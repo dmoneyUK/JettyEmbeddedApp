@@ -10,15 +10,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class HelloHandler extends AbstractHandler {
+    public static final String HELLO_HANDLER_GREETING = "HelloHandler greeting";
+    public static final String SEPERATOR = " - ";
     final String greeting;
     final String body;
 
     public HelloHandler() {
-        this("HelloHandler greeting");
+        this(HELLO_HANDLER_GREETING);
     }
 
     public HelloHandler(String greeting) {
-        this(greeting, null);
+        this(HELLO_HANDLER_GREETING + SEPERATOR + greeting, null);
     }
 
     public HelloHandler(String greeting, String body) {
