@@ -14,7 +14,7 @@ public class HelloHandler extends AbstractHandler {
     final String body;
 
     public HelloHandler() {
-        this("Handlers greeting");
+        this("HelloHandler greeting");
     }
 
     public HelloHandler(String greeting) {
