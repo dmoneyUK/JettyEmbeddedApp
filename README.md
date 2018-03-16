@@ -1,20 +1,28 @@
 # JettyEmbeddedApp
 
-A Jetty server which uses the a servlet to produce a response to a request. 
+A Jetty server which uses the a context to produce a response to a request. 
 
-The handler sets the response status, content-type, and marks the request as handled before it generates the body 
-of the response using a writer.
+A ContextHandler is a ScopedHandler that responds only to requests that have a URI prefix that matches the configured context path. Requests that match the context path have their path methods updated accordingly and the contexts scope is available, which optionally may include:
 
-A handler may:
-- Examine/modify the HTTP request.
-- Generate the complete HTTP response.
-- Call another Handler (see HandlerWrapper).
-- Select one or many Handlers to call (see HandlerCollection).
+- A Classloader that is set as the Thread context classloader while request handling is in scope.
+- A set of attributes that is available via the ServletContext API.
+- A set of init parameters that is available via the ServletContext API.
+- A base Resource which is used as the document root for static resource requests via the ServletContext API.
+- A set of virtual host names.
 
-One or more handlers do all request handling in Jetty. Some handlers select other specific handlers (for example, a 
-ContextHandlerCollection uses the context path to select a ContextHandler); 
-others use application logic to generate a response (for example, the ServletHandler passes the request to an application Servlet)
-, while others do tasks unrelated to generating the response (for example, RequestLogHandler or StatisticsHandler).
 
-Visit http://localhost:8080/ to see the response from the handler.
+## Scoped Handlers
 
+Much of the standard Servlet container in Jetty is implemented with HandlerWrappers that daisy chain handlers together: ContextHandler to SessionHandler to SecurityHandler to ServletHandler. However, because of the nature of the servlet specification, this chaining cannot be a pure nesting of handlers as the outer handlers sometimes need information that the inner handlers process. For example, when a ContextHandler calls some application listeners to inform them of a request entering the context, it must already know which servlet the ServletHandler will dispatch the request to so that the servletPath method returns the correct value.
+
+The HandlerWrapper is specialized to the ScopedHandler abstract class, which supports a daisy chain of scopes. For example if a ServletHandler is nested within a ContextHandler, the order and nesting of execution of methods is:
+
+```
+Server.handle(...)
+  ContextHandler.doScope(...)
+    ServletHandler.doScope(...)
+      ContextHandler.doHandle(...)
+        ServletHandler.doHandle(...)
+          SomeServlet.service(...)
+```
+Thus when the ContextHandler handles the request, it does so within the scope the ServletHandler has established.
